@@ -49,7 +49,7 @@ These credentials were later reused for SSH access.
 SSH login was performed using the recovered credentials:
 
 ```bash id="cap02"
-ssh nathan@<target-ip>
+ssh nathan@<10.10.X.X>
 ```
 
 Successful login confirmed credential reuse vulnerability.
@@ -63,6 +63,8 @@ System enumeration revealed Linux capabilities:
 ```bash id="cap03"
 getcap -r / 2>/dev/null
 ```
+Explanation:
+This command searches the entire filesystem for binaries with Linux capabilities that could be abused for privilege escalation.
 
 Output showed:
 
