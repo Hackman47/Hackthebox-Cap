@@ -73,7 +73,7 @@ Python was used to escalate privileges by setting the UID to root:
 
 Verification:
 
-# id
+id
 uid=0(root)
 
 🏁 Root Access
