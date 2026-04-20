@@ -1,114 +1,88 @@
-# htb-cap-writeup
-Hack The Box Cap machine write-up and notes.
+htb-cap-writeup
 
-## 🔍 Overview
+🔍 Overview
 
-Cap is an easy Hack The Box Linux machine focused on network traffic analysis, credential extraction, and Linux privilege escalation using file capabilities.
+Cap is an easy Linux machine focused on network traffic analysis, credential extraction, and privilege escalation through misconfigured Linux capabilities.
 
----
+⸻
 
-## 🎯 Objectives
+🎯 Objectives
 
-* Analyze a PCAP file
-* Extract credentials from network traffic
-* Gain initial SSH access
-* Escalate privileges using Linux capabilities
+* Analyse captured network traffic
+* Extract credentials from insecure protocols
+* Gain initial system access
+* Perform privilege escalation
 
----
+⸻
 
-## 🌐 Enumeration
+🌐 Enumeration
 
-Initial scan revealed the following services:
+Initial reconnaissance identified the following open services:
 
 * FTP (21)
 * SSH (22)
 * HTTP (80)
 
-A web application allowed downloading of network capture (PCAP) files.
+The web application exposed downloadable PCAP files, indicating potential access to captured network traffic.
 
----
+⸻
 
-## 📡 PCAP Analysis
+📡 PCAP Analysis
 
-The PCAP file was analyzed using Wireshark.
+The PCAP file was analysed using Wireshark.
+By inspecting TCP streams, plaintext FTP credentials were identified:
 
-Using TCP stream analysis, FTP credentials were discovered in plaintext traffic:
+USER nathan  
+PASS <redacted>
 
-```text id="cap01"
-USER nathan
-PASS <password>
-```
+This highlights the insecurity of FTP, where credentials are transmitted without encryption.
 
-These credentials were later reused for SSH access.
+⸻
 
----
+🔑 Initial Access
 
-## 🔑 Initial Access
+The recovered credentials were reused to authenticate via SSH:
 
-SSH login was performed using the recovered credentials:
+ssh nathan@10.10.X.X
 
-```bash id="cap02"
-ssh nathan@<10.10.X.X>
-```
+Successful login confirmed credential reuse across services.
 
-Successful login confirmed credential reuse vulnerability.
+⸻
 
----
+⚙️ Privilege Escalation
 
-## ⚙️ Privilege Escalation
+System enumeration was performed to identify potential escalation vectors:
 
-System enumeration revealed Linux capabilities:
-
-```bash id="cap03"
 getcap -r / 2>/dev/null
-```
-Explanation:
-This command searches the entire filesystem for binaries with Linux capabilities that could be abused for privilege escalation.
-
-Output showed:
-
-```text id="cap04"
+This revealed:
 /usr/bin/python3.8 = cap_setuid+ep
-```
 
----
+The cap_setuid capability allows the binary to change its effective user ID, which can be abused to gain elevated privileges.
 
-## 🚨 Exploitation
+🚨 Exploitation
 
-Python was abused to escalate privileges by setting UID to root:
-
-```bash id="cap05"
+Python was used to escalate privileges by setting the UID to root:
 /usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
-```
 
 Verification:
-
-```bash id="cap06"
 id
 uid=0(root)
-```
 
----
+🏁 Root Access
 
-## 🏁 Root Access
+Root access was successfully obtained.
 
-Root access was achieved successfully.
+⸻
 
-```bash id="cap07"
-cat /root/root.txt
-```
+💡 Key Learnings
 
----
+* FTP transmits credentials in plaintext and should not be used in secure environments
+* Credential reuse significantly increases risk across services
+* Linux capabilities can introduce privilege escalation paths if misconfigured
+* Enumeration tools such as getcap are critical in post-exploitation
 
-## 💡 Key Learnings
+⸻
 
-* FTP traffic is insecure and can expose credentials
-* Credential reuse is a critical security risk
-* Linux capabilities can be exploited for privilege escalation
-* `getcap` is an important enumeration tool
+🧠 Conclusion
 
----
-
-## 🧠 Conclusion
-
-Cap demonstrates a full attack chain from network sniffing to root compromise. It is an excellent introduction to real-world penetration testing techniques.
+This machine demonstrates a full attack chain from network traffic analysis to root compromise. It reinforces the importance of secure protocols, proper credential management, and thorough system enumeration.
