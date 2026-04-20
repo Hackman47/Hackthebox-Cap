@@ -1,6 +1,5 @@
 # htb-cap-writeup
 Hack The Box Cap machine write-up and notes.
-# 🧠 HTB Cap - Write-up
 
 ## 🔍 Overview
 
